@@ -1,0 +1,21 @@
+{
+    "name": "Project.VContainers",
+    "rootNamespace": "",
+    "references": [
+        "GUID:f51ebe6a0ceec4240a699833d6309b23",
+        "GUID:b0214a6008ed146ff8f122a6a9c2f6cc",
+        "GUID:49e1dd7ac2ab94044be53b48691bf3d0",
+        "GUID:5c9041e9a176b384ea5e946d15667483",
+        "GUID:5d5827aadb2636142a9f66344b472d7a",
+        "GUID:8fad38aad37cacb4ba14b5bd87dc5e5f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
