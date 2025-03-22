@@ -7,7 +7,7 @@ namespace Core.Physics
     /// Interface for components that provide raycast input data.
     /// Implementing components must be unmanaged types.
     /// </summary>
-    public interface IRaycast : IComponentData
+    public interface IRaycast : IComponentData, IEnableableComponent
     {
         /// <summary>
         /// Converts the component data to raycast input.

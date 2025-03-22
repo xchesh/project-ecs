@@ -12,7 +12,7 @@ namespace Features.Movement.Player
     /// Converts movement input into NavAgent destination updates.
     /// </summary>
     [BurstCompile]
-    [UpdateAfter(typeof(MovementInputSystem))]
+    [UpdateInGroup(typeof(MovementSimalationSystemGroup))]
     [UpdateBefore(typeof(NavAgentSyncSystem))]
     public partial class PlayerMovementSystem : SystemBase
     {

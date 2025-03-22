@@ -1,4 +1,3 @@
-using System;
 using GameSdk.Core.Loggers;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -13,8 +12,11 @@ namespace Features.Movement
     /// System responsible for synchronizing NavAgent movement with Unity's NavMesh system.
     /// Handles pathfinding and movement of entities with NavAgent components.
     /// </summary>
+    [UpdateInGroup(typeof(MovementSimalationSystemGroup))]
     public partial class NavAgentSyncSystem : SystemBase
     {
+        public const string TAG = "NavAgentSyncSystem";
+
         /// <summary>
         /// Cached NavMeshPath instance used for pathfinding calculations.
         /// Reused to avoid garbage collection overhead.
@@ -70,7 +72,7 @@ namespace Features.Movement
 
                 if (!targetOnMesh)
                 {
-                    Debug.LogWarning($"Target point is off the NavMesh! Position: {targetPosition} (max projection distance: {agent.ValueRO.MaxProjectionDistance})");
+                    SystemLog.LogWarning(TAG, $"Target point is off the NavMesh! Position: {targetPosition} (max projection distance: {agent.ValueRO.MaxProjectionDistance})");
                     agent.ValueRW.HasPath = false;
                     continue;
                 }
@@ -80,7 +82,7 @@ namespace Features.Movement
 
                 if (!isCalculated)
                 {
-                    Debug.LogWarning($"Failed to calculate path to {targetHit.position}");
+                    SystemLog.LogWarning(TAG, $"Failed to calculate path to {targetHit.position}");
                     agent.ValueRW.HasPath = false;
                     continue;
                 }

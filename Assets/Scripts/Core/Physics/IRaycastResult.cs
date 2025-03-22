@@ -7,7 +7,7 @@ namespace Core.Physics
     /// Interface for components that can store raycast results.
     /// Implementing components must be unmanaged types.
     /// </summary>
-    public interface IRaycastResult<T> : IComponentData where T : unmanaged, IRaycastResult<T>
+    public interface IRaycastResult<T> : IComponentData, IEnableableComponent where T : unmanaged, IRaycastResult<T>
     {
         /// <summary>
         /// Creates a new instance of raycast result from hit data.

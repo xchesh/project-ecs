@@ -10,7 +10,7 @@ namespace Core.Physics
     /// Utility class for performing efficient raycasts in Unity Physics.
     /// Provides methods for both single and batch raycast operations using Unity's Job System.
     /// </summary>
-    public static class RaycastUtils
+    public static class RaycastsUtils
     {
         /// <summary>
         /// Burst-compiled job for performing multiple raycasts in parallel.

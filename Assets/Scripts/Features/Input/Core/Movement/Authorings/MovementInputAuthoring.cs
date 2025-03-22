@@ -18,7 +18,7 @@ namespace Features.Input
         {
             public override void Bake(MovementInputAuthoring authoring)
             {
-                var entity = GetEntity(TransformUsageFlags.Dynamic);
+                var entity = GetEntityWithoutDependency();
 
                 // Add MovementInput component to the entity
                 AddComponent<MovementInput>(entity);

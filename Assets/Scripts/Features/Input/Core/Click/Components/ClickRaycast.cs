@@ -1,15 +1,11 @@
+using Core.Physics;
 using Unity.Entities;
-using Unity.Physics;
 using Unity.Mathematics;
+using Unity.Physics;
 
-namespace Core.Physics
+namespace Features.Input
 {
-    /// <summary>
-    /// Component that defines input parameters for a raycast operation.
-    /// Attach this component to entities that need continuous raycast checking.
-    /// Can be temporarily disabled using SetEnabled/IsEnabled.
-    /// </summary>
-    public struct Raycast : IRaycast, IEnableableComponent
+    public struct ClickRaycast : IRaycast, IEnableableComponent
     {
         /// <summary>The starting point of the ray in world space.</summary>
         public float3 Start;

@@ -1,22 +1,16 @@
-using Core.Physics;
 using GameSdk.Core.Loggers;
 using Unity.Burst;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Jobs;
 using Unity.Physics;
-using Unity.Physics.Systems;
-
-[assembly: RegisterGenericComponentType(typeof(Raycast))]
-[assembly: RegisterGenericComponentType(typeof(RaycastResult))]
-[assembly: RegisterGenericSystemType(typeof(RaycastSystem<Raycast, RaycastResult>))]
 
 namespace Core.Physics
 {
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateAfter(typeof(PhysicsSystemGroup))]
+    [WorldSystemFilter(WorldSystemFilterFlags.Default | WorldSystemFilterFlags.Editor | WorldSystemFilterFlags.ThinClientSimulation)]
+    [UpdateInGroup(typeof(RaycastsSimulationSystemGroup))]
     [BurstCompile]
-    public partial struct RaycastSystem<TRaycast, TRaycastResult> : ISystem
+    public partial struct RaycastsSystem<TRaycast, TRaycastResult> : ISystem
         where TRaycast : unmanaged, IRaycast
         where TRaycastResult : unmanaged, IRaycastResult<TRaycastResult>
     {
@@ -57,26 +51,22 @@ namespace Core.Physics
                 var result = default(TRaycastResult);
                 var newResult = result.ToRaycastResult(hit);
 
-                if (RaycastResults.HasComponent(entity))
-                {
-                    Ecb.SetComponent(index, entity, newResult);
-                }
-                else
-                {
-                    Ecb.AddComponent(index, entity, newResult);
-                }
-
-                Ecb.RemoveComponent<TRaycast>(index, entity);
+                Ecb.SetComponent(index, entity, newResult);
+                Ecb.SetComponentEnabled<TRaycast>(index, entity, false);
+                Ecb.SetComponentEnabled<TRaycastResult>(index, entity, true);
             }
         }
 
         public void OnCreate(ref SystemState state)
         {
-            _raycastQuery = state.GetEntityQuery(ComponentType.ReadOnly<TRaycast>());
+            _raycastQuery = new EntityQueryBuilder(Allocator.Temp)
+                .WithAll<TRaycast>()
+                .WithPresent<TRaycastResult>()
+                .Build(ref state);
 
             state.RequireForUpdate(_raycastQuery);
             state.RequireForUpdate<PhysicsWorldSingleton>();
-            state.RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
+            state.RequireForUpdate<RaycastsCommandBufferSystem.Singleton>();
         }
 
         [BurstCompile]
@@ -102,9 +92,9 @@ namespace Core.Physics
             var prepareHandle = prepareJob.Schedule(raycastCount, BATCH_SIZE, state.Dependency);
 
             var physicsWorld = SystemAPI.GetSingleton<PhysicsWorldSingleton>();
-            var raycastHandle = RaycastUtils.ScheduleBatchRayCast(physicsWorld, inputs, results, prepareHandle);
+            var raycastHandle = RaycastsUtils.ScheduleBatchRayCast(physicsWorld, inputs, results, prepareHandle);
 
-            var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+            var ecbSystem = SystemAPI.GetSingleton<RaycastsCommandBufferSystem.Singleton>();
             var ecb = ecbSystem.CreateCommandBuffer(state.WorldUnmanaged).AsParallelWriter();
 
             var processJob = new ProcessRaycastResultsJob

@@ -2,6 +2,7 @@ using Unity.Entities;
 using UnityEngine;
 using Features.Input;
 using Unity.Mathematics;
+using Core.Common.Extensions;
 
 namespace Features.Movement.Player
 {
@@ -25,7 +26,12 @@ namespace Features.Movement.Player
 
                 // Add input components
                 AddComponent<MovementInput>(entity);
-                AddComponent<ClickInput>(entity);
+
+                this.AddComponent<ClickInput>(entity, false);
+                this.AddComponent<ClickPerformInput>(entity, false);
+                this.AddComponent<ClickRaycast>(entity, false);
+                this.AddComponent<ClickRaycastResult>(entity, false);
+                this.AddComponent<ClickInputWorldPosition>(entity, false);
 
                 // Add nav agent component with configuration
                 AddComponent(entity, new NavAgent

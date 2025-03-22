@@ -1,15 +1,16 @@
 using Core.Physics;
+using GameSdk.Core.Loggers;
 using Unity.Burst;
 using Unity.Entities;
-using GameSdk.Core.Loggers;
 
 namespace Features.Input
 {
     /// <summary>
     /// System that processes raycast results and creates click world position components.
     /// </summary>
-    [UpdateInGroup(typeof(SimulationSystemGroup))]
-    [UpdateAfter(typeof(RaycastSystem<Raycast, RaycastResult>))]
+    [UpdateInGroup(typeof(RaycastsSimulationSystemGroup), OrderLast = true)]
+    [UpdateAfter(typeof(RaycastsSystem<ClickRaycast, ClickRaycastResult>))]
+    [UpdateAfter(typeof(RaycastsCommandBufferSystem))]
     [BurstCompile]
     public partial struct ClickRaycastProcessSystem : ISystem
     {
@@ -17,40 +18,35 @@ namespace Features.Input
 
         public void OnCreate(ref SystemState state)
         {
-            state.RequireForUpdate<RaycastResult>();
             state.RequireForUpdate<ClickInput>();
+            state.RequireForUpdate<ClickRaycastResult>();
+            state.RequireForUpdate<ClickInputWorldPosition>();
         }
 
         [BurstCompile]
         public void OnUpdate(ref SystemState state)
         {
-            var ecb = new EntityCommandBuffer(Unity.Collections.Allocator.Temp);
+            var clickPositionsLookup = SystemAPI.GetComponentLookup<ClickInputWorldPosition>();
 
-            // Process raycast results
-            foreach (var (_, raycastResult, entity) in SystemAPI.Query<RefRO<ClickInput>, RefRO<RaycastResult>>().WithEntityAccess())
+            foreach (var (raycastResult, entity) in SystemAPI.Query<RefRO<ClickRaycastResult>>().WithAll<ClickRaycastResult>().WithEntityAccess())
             {
-                var clickWorldPosition = new ClickWorldPosition
+                SystemLog.Log(TAG, $"Click raycast processed = {raycastResult.ValueRO.HasHit} | {raycastResult.ValueRO.HitPosition}");
+
+                var clickWorldPosition = new ClickInputWorldPosition
                 {
                     Position = raycastResult.ValueRO.HitPosition,
                     HasPosition = raycastResult.ValueRO.HasHit
                 };
 
-                var clickPositions = SystemAPI.GetComponentLookup<ClickWorldPosition>();
-
-                if (clickPositions.HasComponent(entity))
+                if (!clickPositionsLookup.HasComponent(entity))
                 {
-                    ecb.SetComponent(entity, clickWorldPosition);
-                }
-                else
-                {
-                    ecb.AddComponent(entity, clickWorldPosition);
+                    state.EntityManager.AddComponent<ClickInputWorldPosition>(entity);
                 }
 
-                ecb.RemoveComponent<RaycastResult>(entity);
+                clickPositionsLookup[entity] = clickWorldPosition;
+                SystemAPI.SetComponentEnabled<ClickInputWorldPosition>(entity, true);
+                SystemAPI.SetComponentEnabled<ClickRaycastResult>(entity, false);
             }
-
-            ecb.Playback(state.EntityManager);
-            ecb.Dispose();
         }
     }
 }

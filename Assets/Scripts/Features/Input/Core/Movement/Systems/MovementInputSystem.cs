@@ -3,8 +3,6 @@ using Unity.Entities;
 using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Features.Movement;
-using GameSdk.Core.Loggers;
 
 namespace Features.Input
 {

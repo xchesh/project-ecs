@@ -1,14 +1,15 @@
+using Core.Physics;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Physics;
 
-namespace Core.Physics
+namespace Features.Input
 {
     /// <summary>
     /// Component that stores the results of a raycast operation.
     /// This component is automatically updated by the RaycastSystem.
     /// </summary>
-    public struct RaycastResult : IRaycastResult<RaycastResult>, IEnableableComponent
+    public struct ClickRaycastResult : IRaycastResult<ClickRaycastResult>
     {
         /// <summary>The entity that was hit by the ray, or Entity.Null if no hit occurred.</summary>
         public Entity HitEntity;
@@ -24,9 +25,9 @@ namespace Core.Physics
         /// </summary>
         /// <param name="hit">The RaycastHit to convert.</param>
         /// <returns>A new RaycastResult instance.</returns>
-        public RaycastResult ToRaycastResult(RaycastHit hit)
+        public ClickRaycastResult ToRaycastResult(RaycastHit hit)
         {
-            return new RaycastResult
+            return new ClickRaycastResult
             {
                 HitEntity = hit.Entity,
                 HitPosition = hit.Position,
