@@ -26,10 +26,11 @@ namespace Features.Input
         {
             var raycastLookup = SystemAPI.GetComponentLookup<ClickRaycast>();
 
-            foreach (var (clickInput, entity) in SystemAPI.Query<RefRW<ClickInput>>().WithAll<ClickInput>().WithEntityAccess())
+            foreach (var (clickInput, entity) in SystemAPI.Query<RefRW<ClickInput>>().WithEntityAccess())
             {
                 var raycast = new ClickRaycast
                 {
+                    Ray = clickInput.ValueRO.Ray,
                     Start = clickInput.ValueRO.Ray.origin,
                     End = clickInput.ValueRO.Ray.origin + clickInput.ValueRO.Ray.direction * 100f, // 100 units range
                     Filter = new CollisionFilter
@@ -47,7 +48,6 @@ namespace Features.Input
 
                 raycastLookup[entity] = raycast;
                 SystemAPI.SetComponentEnabled<ClickRaycast>(entity, true);
-                SystemAPI.SetComponentEnabled<ClickInput>(entity, false);
             }
         }
     }

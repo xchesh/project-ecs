@@ -97,7 +97,20 @@ namespace Features.Movement
                     // Move towards the next corner in the calculated path
                     var nextCorner = _path.corners[1];
                     var speed = agent.ValueRW.Speed;
-                    transform.ValueRW.Position = Vector3.MoveTowards(startPosition, nextCorner, speed * SystemAPI.Time.DeltaTime);
+
+                    // Calculate interpolated position
+                    var newPosition = Vector3.MoveTowards(startPosition, nextCorner, speed * SystemAPI.Time.DeltaTime);
+
+                    // Sample the position on NavMesh
+                    if (NavMesh.SamplePosition(newPosition, out var hit, agent.ValueRO.MaxProjectionDistance, NavMesh.AllAreas))
+                    {
+                        transform.ValueRW.Position = hit.position;
+                    }
+                    else
+                    {
+                        SystemLog.LogWarning(TAG, $"Failed to sample position on NavMesh at {newPosition}");
+                        agent.ValueRW.HasPath = false;
+                    }
                 }
                 else
                 {

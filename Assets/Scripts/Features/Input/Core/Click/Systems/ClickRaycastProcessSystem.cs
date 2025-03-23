@@ -28,7 +28,7 @@ namespace Features.Input
         {
             var clickPositionsLookup = SystemAPI.GetComponentLookup<ClickInputWorldPosition>();
 
-            foreach (var (raycastResult, entity) in SystemAPI.Query<RefRO<ClickRaycastResult>>().WithAll<ClickRaycastResult>().WithEntityAccess())
+            foreach (var (raycastResult, entity) in SystemAPI.Query<RefRO<ClickRaycastResult>>().WithEntityAccess())
             {
                 SystemLog.Log(TAG, $"Click raycast processed = {raycastResult.ValueRO.HasHit} | {raycastResult.ValueRO.HitPosition}");
 

@@ -7,6 +7,9 @@ namespace Features.Input
 {
     public struct ClickRaycast : IRaycast, IEnableableComponent
     {
+        /// <summary>The ray from camera through click position.</summary>
+        public UnityEngine.Ray Ray;
+
         /// <summary>The starting point of the ray in world space.</summary>
         public float3 Start;
 
