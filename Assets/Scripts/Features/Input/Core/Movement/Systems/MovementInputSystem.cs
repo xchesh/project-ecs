@@ -11,6 +11,7 @@ namespace Features.Input
     /// Handles input from the new Unity Input System and can be extended
     /// to support different input sources.
     /// </summary>
+    [UpdateInGroup(typeof(InputSimalationSystemGroup))]
     [BurstCompile]
     public partial class MovementInputSystem : SystemBase
     {
@@ -18,10 +19,12 @@ namespace Features.Input
 
         private InputSystemActions _actions;
         private float2 _direction;
+        private bool _hasInput;
 
         protected override void OnCreate()
         {
             RequireForUpdate<MovementInput>();
+            RequireForUpdate<EndSimulationEntityCommandBufferSystem.Singleton>();
 
             _actions = new InputSystemActions();
             _actions.Enable();
@@ -40,20 +43,41 @@ namespace Features.Input
 
         protected override void OnUpdate()
         {
-            foreach (var input in SystemAPI.Query<RefRW<MovementInput>>())
+            if (_hasInput)
             {
-                input.ValueRW.Direction = _direction;
+                foreach (var (input, entity) in SystemAPI.Query<RefRW<MovementInput>>().WithPresent<MovementInput>().WithEntityAccess())
+                {
+                    input.ValueRW.Direction = _direction;
+                    input.ValueRW.IsActive = true;
+                    SystemAPI.SetComponentEnabled<MovementInput>(entity, true);
+                }
+
+                return;
+            }
+
+            // Schedule component disabling at the end of simulation
+            var ecbSystem = SystemAPI.GetSingleton<EndSimulationEntityCommandBufferSystem.Singleton>();
+            var ecb = ecbSystem.CreateCommandBuffer(World.Unmanaged);
+
+            foreach (var (input, entity) in SystemAPI.Query<RefRW<MovementInput>>().WithEntityAccess())
+            {
+                input.ValueRW.Direction = float2.zero;
+                input.ValueRW.IsActive = false;
+                ecb.SetComponentEnabled<MovementInput>(entity, false);
             }
         }
 
-        private void OnMovePerformed(InputAction.CallbackContext ctx)
+        private void OnMovePerformed(InputAction.CallbackContext context)
         {
-            _direction = ctx.ReadValue<Vector2>();
+            var value = context.ReadValue<Vector2>();
+            _direction = new float2(value.x, value.y);
+            _hasInput = true;
         }
 
-        private void OnMoveCanceled(InputAction.CallbackContext _)
+        private void OnMoveCanceled(InputAction.CallbackContext context)
         {
             _direction = float2.zero;
+            _hasInput = false;
         }
     }
 }

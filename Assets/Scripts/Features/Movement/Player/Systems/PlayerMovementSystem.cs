@@ -22,21 +22,18 @@ namespace Features.Movement.Player
             {
                 var direction = input.ValueRO.Direction;
 
-                if (math.lengthsq(direction) > float.Epsilon)
-                {
-                    // Calculate target position based on current position and input direction
-                    var currentPos = transform.ValueRO.Position;
-                    var targetPos = new float3(
-                        currentPos.x + direction.x,
-                        currentPos.y,
-                        currentPos.z + direction.y
-                    );
+                // Calculate target position based on current position and input direction
+                var currentPos = transform.ValueRO.Position;
+                var targetPos = new float3(
+                    currentPos.x + direction.x,
+                    currentPos.y,
+                    currentPos.z + direction.y
+                );
 
-                    // Update NavAgent state
-                    agent.ValueRW.MaxProjectionDistance = NavAgent.PRECISE_PROJECTION;
-                    agent.ValueRW.Destination = targetPos;
-                    agent.ValueRW.HasPath = true;
-                }
+                // Update NavAgent state
+                agent.ValueRW.MaxProjectionDistance = NavAgent.PRECISE_PROJECTION;
+                agent.ValueRW.Destination = targetPos;
+                agent.ValueRW.HasPath = input.ValueRO.IsActive;
             }
         }
     }
